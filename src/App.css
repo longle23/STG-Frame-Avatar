@@ -1,0 +1,325 @@
+.file-upload-label.red {
+  background: linear-gradient(90deg, #dc2626, #b91c1c);
+}
+.file-upload-label.red:hover {
+  background: linear-gradient(90deg, #b91c1c, #dc2626);
+}
+.message-note.red {
+  color: #dc2626;
+  font-weight: 600;
+}
+.full-width-btn {
+  width: 100% !important;
+  max-width: 100%;
+  min-width: 0;
+  display: block;
+}
+/* Reset và style cơ bản */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #dbeafe 100%);
+}
+
+/* Container chính */
+
+.avatar-frame-container.horizontal-layout {
+  display: flex;
+  width: 100%;
+  max-width: 1200px;
+  min-height: 80vh;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+@media (max-width: 900px) {
+  .avatar-frame-container.horizontal-layout {
+    flex-direction: column;
+    min-height: unset;
+    max-width: 98vw;
+  }
+  .avatar-frame-container .left-panel,
+  .avatar-frame-container .right-panel {
+    flex: unset;
+    width: 100%;
+    padding: 24px 8px;
+    border-right: none;
+    border-bottom: 1px solid rgba(0,0,0,0.08);
+  }
+  .avatar-frame-container .right-panel {
+    border-bottom: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .avatar-frame-container.horizontal-layout {
+    border-radius: 0;
+    box-shadow: none;
+    padding: 0;
+  }
+  .company-title {
+    font-size: 1.5rem;
+  }
+  .celebration-title {
+    font-size: 1.1rem;
+    margin-bottom: 20px;
+  }
+  .step-number {
+    width: 28px;
+    height: 28px;
+    font-size: 1rem;
+  }
+  .button-group {
+    flex-direction: column;
+    gap: 12px;
+  }
+}
+
+/* Panel trái và phải */
+.avatar-frame-container .left-panel,
+.avatar-frame-container .right-panel {
+  flex: 0 0 50%;
+  padding: 40px;
+}
+
+.avatar-frame-container .left-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-right: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.avatar-frame-container .right-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+}
+
+/* Tiêu đề */
+.company-title {
+  font-size: 2.8rem;
+  font-weight: 900;
+  background: linear-gradient(90deg, #ff0000, #990000);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  margin-bottom: 16px;
+}
+
+.celebration-title {
+  font-size: 1.8rem;
+  color: #2563eb;
+  margin-bottom: 48px;
+  line-height: 1.4;
+  font-weight: 600;
+}
+
+/* Steps container */
+.steps-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.step {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.step-number {
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, #0a2a6c, #2563eb);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 1.2rem;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+}
+
+/* Input styles */
+.file-upload-label {
+  cursor: pointer;
+  display: inline-block;
+  background: linear-gradient(90deg, #0a2a6c, #2563eb);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 16px 20px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.2);
+  transition: all 0.3s ease;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  text-align: center;
+}
+
+.file-upload-label:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.3);
+  background: linear-gradient(90deg, #2563eb, #0a2a6c);
+}
+
+.colorful-input {
+  margin: 16px 0;
+  padding: 10px;
+  border-radius: 12px;
+  border: 2px solid #6366f1;
+  background: linear-gradient(90deg, #e0e7ff 60%, #fff 100%);
+  font-size: 1rem;
+  box-shadow: 0 2px 8px #6366f133;
+  transition: border 0.2s, box-shadow 0.2s;
+}
+.colorful-input:focus {
+  border: 2px solid #3b82f6;
+  box-shadow: 0 4px 16px #3b82f666;
+}
+
+.message-input {
+  width: 100%;
+  padding: 14px 20px;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  transition: all 0.3s ease;
+  background: white;
+  box-sizing: border-box;
+}
+.message-note {
+  font-size: 0.95em;
+  color: #64748b;
+  margin-top: 4px;
+  margin-left: 8px;
+}
+
+.message-input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+  outline: none;
+}
+
+/* Button group */
+.button-group {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 16px;
+  width: 100%;
+  margin-top: 32px;
+}
+
+.colorful-btn {
+  padding: 16px;
+  width: 180px;
+  height: 56px;
+  background: linear-gradient(90deg, #0a2a6c, #2563eb);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.colorful-btn.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+  background: #94a3b8;
+}
+
+.colorful-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.3);
+  background: linear-gradient(90deg, #2563eb, #0a2a6c);
+}
+
+.reset-btn {
+  padding: 16px;
+  width: 180px;
+  height: 56px;
+  border: 2px solid #2563eb;
+  background: white;
+  color: #2563eb;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  line-height: normal;
+}
+
+.reset-btn:hover {
+  background: #f8fafc;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.15);
+}
+
+/* Preview image */
+.preview-image {
+  max-width: 90%;
+  height: auto;
+  border-radius: 16px;
+  box-shadow: 0 12px 40px rgba(37, 99, 235, 0.15);
+  transition: all 0.3s ease;
+  animation: previewPop 0.7s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+}
+
+.preview-image:hover {
+  transform: scale(1.02);
+  box-shadow: 0 16px 48px rgba(37, 99, 235, 0.2);
+}
+
+/* Animations */
+@keyframes previewPop {
+  0% {
+    opacity: 0;
+    transform: scale(0.8) rotate(-5deg);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.05) rotate(2deg);
+  }
+  100% {
+    transform: scale(1) rotate(0);
+  }
+}
+
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
+}
