@@ -33,6 +33,10 @@ const AvatarFrame: React.FC = () => {
   const [resultUrl, setResultUrl] = useState<string | null>(null);
   const [message, setMessage] = useState<string>('');
   const [employeeId, setEmployeeId] = useState<string>('');
+  const [isStep1Confirmed, setIsStep1Confirmed] = useState<boolean>(false);
+  const [isValidatingCode, setIsValidatingCode] = useState<boolean>(false);
+  const [codeError, setCodeError] = useState<string>('');
+  const [codeToMessageMap, setCodeToMessageMap] = useState<Record<string, string> | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
 
@@ -117,6 +121,37 @@ const AvatarFrame: React.FC = () => {
     setResultUrl(null);
     setMessage('');
     setEmployeeId('');
+    setIsStep1Confirmed(false);
+    setIsValidatingCode(false);
+    setCodeError('');
+  };
+
+  // Tải và parse CSV chỉ 1 lần khi cần
+  const loadCodeMessageCsv = async (): Promise<Record<string, string>> => {
+    if (codeToMessageMap) return codeToMessageMap;
+    const response = await fetch('/CodeMessage.csv');
+    if (!response.ok) throw new Error('Không tải được CodeMessage.csv');
+    const text = await response.text();
+    const lines = text.split(/\r?\n/);
+    const map: Record<string, string> = {};
+    // Bỏ header
+    for (let i = 1; i < lines.length; i++) {
+      const rawLine = lines[i];
+      if (!rawLine) continue;
+      // Tách tại dấu phẩy đầu tiên để giữ nguyên dấu phẩy trong Message
+      const firstComma = rawLine.indexOf(',');
+      if (firstComma === -1) continue;
+      let code = rawLine.slice(0, firstComma).trim();
+      let msgRaw = rawLine.slice(firstComma + 1).trim();
+      if (!code) continue;
+      // Xử lý message có dấu nháy
+      if (msgRaw.startsWith('"') && msgRaw.endsWith('"')) {
+        msgRaw = msgRaw.slice(1, -1).replace(/""/g, '"');
+      }
+      map[code] = msgRaw;
+    }
+    setCodeToMessageMap(map);
+    return map;
   };
 
   return (
@@ -126,12 +161,60 @@ const AvatarFrame: React.FC = () => {
         <h2 className="celebration-title">Frame Avatar for the 50th Anniversary Celebration</h2>
 
         <div className="steps-container">
+          {/* Bước 1: Nhập mã + Xác nhận */}
           <div className="step">
             <span className="step-number">1</span>
+            <div style={{ flex: 1, display: 'flex', gap: '10px', alignItems: 'stretch' }}>
+              <input
+                type="text"
+                placeholder="Nhập mã nhân viên"
+                value={employeeId}
+                onChange={(e) => setEmployeeId(e.target.value)}
+                className="message-input"
+                style={{ flex: 1 }}
+                disabled={isStep1Confirmed}
+              />
+              <button
+                type="button"
+                className={`colorful-btn confirm-btn${(!employeeId || isStep1Confirmed || isValidatingCode) ? ' disabled' : ''}`}
+                onClick={async () => {
+                  if (!employeeId || isStep1Confirmed || isValidatingCode) return;
+                  try {
+                    setIsValidatingCode(true);
+                    setCodeError('');
+                    const map = await loadCodeMessageCsv();
+                    const normalized = employeeId.trim();
+                    if (normalized && map[normalized] !== undefined) {
+                      const csvMsg = map[normalized];
+                      if (csvMsg) setMessage(csvMsg);
+                      setIsStep1Confirmed(true);
+                    } else {
+                      setCodeError('Mã không tồn tại.');
+                    }
+                  } catch (err) {
+                    setCodeError('Không thể kiểm tra mã. Vui lòng thử lại.');
+                  } finally {
+                    setIsValidatingCode(false);
+                  }
+                }}
+              >
+                {isValidatingCode ? 'ĐANG KIỂM TRA...' : 'XÁC NHẬN'}
+              </button>
+            </div>
+          </div>
+          {codeError && (
+            <div className="message-note red" style={{ marginTop: -8 }}>
+              {codeError}
+            </div>
+          )}
+
+          {/* Bước 2: Lấy ảnh */}
+          <div className="step">
+            <span className="step-number">2</span>
             <div style={{ flex: 1 }}>
               <label
                 htmlFor="file-upload"
-                className={`colorful-btn file-upload-label full-width-btn${userImage ? ' red' : ''}`}
+                className={`colorful-btn file-upload-label full-width-btn${userImage ? ' red' : ''}${!isStep1Confirmed ? ' disabled' : ''}`}
                 style={{ width: '100%' }}
               >
                 {userImage ? 'CHỌN ẢNH KHÁC' : 'LẤY ẢNH'}
@@ -140,44 +223,16 @@ const AvatarFrame: React.FC = () => {
                 id="file-upload"
                 type="file"
                 accept="image/*"
-                onChange={handleImageUpload}
+                onChange={(e) => {
+                  if (!isStep1Confirmed) return;
+                  handleImageUpload(e);
+                }}
                 style={{ display: 'none' }}
               />
             </div>
           </div>
 
-          <div className="step">
-            <span className="step-number">2</span>
-            <div style={{ flex: 1, display: 'flex', gap: '10px', alignItems: 'stretch' }}>
-              <input
-                type="text"
-                placeholder="Nhập mã nhân viên"
-                value={employeeId}
-                onChange={(e) => setEmployeeId(e.target.value)}
-                className="message-input"
-                style={{ flex: 1, height: 'auto' }}
-              />
-              <button
-                type="button"
-                className="colorful-btn"
-                style={{ 
-                  minWidth: '80px', 
-                  height: '48px',
-                  padding: '0 16px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}
-                onClick={() => {
-                  // TODO: Implement search functionality
-                  console.log('Searching for employee:', employeeId);
-                }}
-              >
-                TÌM
-              </button>
-            </div>
-          </div>
-
+          {/* Bước 3: Nhập câu chúc */}
           <div className="step">
             <span className="step-number">3</span>
             <div style={{ flex: 1 }}>
@@ -198,10 +253,10 @@ const AvatarFrame: React.FC = () => {
 
           <div className="button-group">
             <button
-              className={`colorful-btn full-width-btn${(!userImage || !message) ? ' disabled' : ''}`}
+              className={`colorful-btn full-width-btn${(!isStep1Confirmed || !userImage || !message) ? ' disabled' : ''}`}
               style={{ marginBottom: 0 }}
               onClick={(e) => {
-                if (!userImage || !message) {
+                if (!isStep1Confirmed || !userImage || !message) {
                   e.preventDefault();
                 } else {
                   const link = document.createElement("a");

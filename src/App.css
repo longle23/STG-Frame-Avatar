@@ -4,6 +4,12 @@
 .file-upload-label.red:hover {
   background: linear-gradient(90deg, #b91c1c, #dc2626);
 }
+.file-upload-label.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+  background: #94a3b8;
+}
 .message-note.red {
   color: #dc2626;
   font-weight: 600;
@@ -204,6 +210,10 @@
   transition: all 0.3s ease;
   background: white;
   box-sizing: border-box;
+}
+.confirm-btn {
+  height: 52px; /* gần bằng chiều cao input (14px*2 + line-height) */
+  padding: 0 20px;
 }
 .message-note {
   font-size: 0.95em;
