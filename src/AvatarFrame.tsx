@@ -11,7 +11,8 @@ const LINE_HEIGHT = 32; // khoảng cách dòng
 // Component AvatarFrame: Cho phép người dùng tải ảnh lên, chèn vào khung, xem trước và xuất ảnh.
 import React, { useRef, useState } from 'react';
 
-const FRAME_SRC = '/src/assets/Frame_Avatar.png';
+// const FRAME_SRC = '/src/assets/Frame_Avatar.png';
+const FRAME_SRC = '/public/Frame_Avatar.png';
 const CANVAS_WIDTH = 1000;
 const CANVAS_HEIGHT = 1000;
 
@@ -20,8 +21,9 @@ const AvatarFrame: React.FC = () => {
   React.useEffect(() => {
     const font = new FontFace(
       'Lexend',
-      'url(/src/assets/Font/Lexend-Regular.ttf)'
-    );
+      // 'url(/src/assets/Font/Lexend-Regular.ttf)'
+      'url(/public/font/Lexend-Regular.ttf)'
+    );  
     font.load().then((loadedFont) => {
       // @ts-ignore
       document.fonts.add(loadedFont);
