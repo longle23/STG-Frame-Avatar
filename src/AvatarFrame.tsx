@@ -32,6 +32,7 @@ const AvatarFrame: React.FC = () => {
   const [userImage, setUserImage] = useState<string | null>(null);
   const [resultUrl, setResultUrl] = useState<string | null>(null);
   const [message, setMessage] = useState<string>('');
+  const [employeeId, setEmployeeId] = useState<string>('');
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
 
@@ -115,6 +116,7 @@ const AvatarFrame: React.FC = () => {
     setUserImage(null);
     setResultUrl(null);
     setMessage('');
+    setEmployeeId('');
   };
 
   return (
@@ -146,6 +148,38 @@ const AvatarFrame: React.FC = () => {
 
           <div className="step">
             <span className="step-number">2</span>
+            <div style={{ flex: 1, display: 'flex', gap: '10px', alignItems: 'stretch' }}>
+              <input
+                type="text"
+                placeholder="Nhập mã nhân viên"
+                value={employeeId}
+                onChange={(e) => setEmployeeId(e.target.value)}
+                className="message-input"
+                style={{ flex: 1, height: 'auto' }}
+              />
+              <button
+                type="button"
+                className="colorful-btn"
+                style={{ 
+                  minWidth: '80px', 
+                  height: '48px',
+                  padding: '0 16px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+                onClick={() => {
+                  // TODO: Implement search functionality
+                  console.log('Searching for employee:', employeeId);
+                }}
+              >
+                TÌM
+              </button>
+            </div>
+          </div>
+
+          <div className="step">
+            <span className="step-number">3</span>
             <div style={{ flex: 1 }}>
               <input
                 type="text"
@@ -156,6 +190,7 @@ const AvatarFrame: React.FC = () => {
                 }}
                 className="message-input"
                 maxLength={100}
+                disabled={!userImage}
               />
               <div className={`message-note${message.length === 100 ? ' red' : ''}`}>Tối đa 100 ký tự</div>
             </div>
