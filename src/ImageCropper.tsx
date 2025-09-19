@@ -41,18 +41,34 @@ const ImageCropper: React.FC<ImageCropperProps> = ({
   const handleImageLoad = () => {
     // Chỉ khởi tạo nếu chưa có crop data
     if (cropData.width === 200 && cropData.height === 200) {
-      // Khởi tạo crop area rộng hơn (80% container)
-      const initialSize = Math.min(containerWidth, containerHeight) * 0.8;
+      // Khởi tạo crop area rất nhỏ ở giữa container
+      const initialSize = Math.min(containerWidth, containerHeight) * 0.25;
       const centerX = (containerWidth - initialSize) / 2;
       const centerY = (containerHeight - initialSize) / 2;
       
-      setCropData({
-        x: centerX,
-        y: centerY,
-        width: initialSize,
-        height: initialSize,
-        scale: 1
-      });
+      // Tính scale phù hợp với object-fit: contain
+      const img = imageRef.current;
+      if (img) {
+        // Với object-fit: contain, ảnh sẽ tự động fit vào container
+        // Chúng ta chỉ cần scale nhỏ hơn để dễ căn chỉnh
+        let initialScale = 0.3; // Mặc định 30%
+        
+        setCropData({
+          x: centerX,
+          y: centerY,
+          width: initialSize,
+          height: initialSize,
+          scale: initialScale
+        });
+      } else {
+        setCropData({
+          x: centerX,
+          y: centerY,
+          width: initialSize,
+          height: initialSize,
+          scale: 0.3
+        });
+      }
     }
   };
 
@@ -163,6 +179,10 @@ const ImageCropper: React.FC<ImageCropperProps> = ({
           alt="Crop source"
           onLoad={handleImageLoad}
           style={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: `translate(-50%, -50%) scale(${cropData.scale})`,
             width: '100%',
             height: '100%',
             objectFit: 'contain',
@@ -197,6 +217,25 @@ const ImageCropper: React.FC<ImageCropperProps> = ({
             <div className="grid-line horizontal" style={{ top: '33.33%' }} />
             <div className="grid-line horizontal" style={{ top: '66.66%' }} />
           </div>
+        </div>
+      </div>
+
+      {/* Zoom Controls */}
+      <div className="cropper-controls">
+        <div className="zoom-controls">
+          <button 
+            className="zoom-btn"
+            onClick={() => setCropData(prev => ({ ...prev, scale: Math.max(0.1, prev.scale - 0.1) }))}
+          >
+            −
+          </button>
+          <span className="zoom-level">{Math.round(cropData.scale * 100)}%</span>
+          <button 
+            className="zoom-btn"
+            onClick={() => setCropData(prev => ({ ...prev, scale: Math.min(3, prev.scale + 0.1) }))}
+          >
+            +
+          </button>
         </div>
       </div>
 

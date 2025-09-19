@@ -600,3 +600,50 @@
   width: 100%;
   left: 0;
 }
+
+/* Controls */
+.cropper-controls {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  display: flex;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.8);
+  padding: 8px 12px;
+  border-radius: 6px;
+  z-index: 5;
+}
+
+.zoom-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.zoom-btn {
+  width: 32px;
+  height: 32px;
+  background: #fff600;
+  color: #1f2937;
+  border: none;
+  border-radius: 50%;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.zoom-btn:hover {
+  background: #ffeb3b;
+  transform: scale(1.1);
+}
+
+.zoom-level {
+  color: white;
+  font-weight: 600;
+  min-width: 40px;
+  text-align: center;
+}
