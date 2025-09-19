@@ -5,7 +5,7 @@
 // Tuỳ chỉnh vị trí và wrap text ở đây:
 const TEXT_X = 400; // toạ độ X (giữa ảnh)
 const TEXT_Y = 752; // toạ độ Y (gần cuối ảnh)
-const MAX_CHARS_PER_LINE = 29; // Số ký tự tối đa mỗi dòng
+const MAX_CHARS_PER_LINE = 40; // S40ký tự tối đa mỗi dòng
 const LINE_HEIGHT = 32; // khoảng cách dòng
 
 // Component AvatarFrame: Cho phép người dùng tải ảnh lên, chèn vào khung, xem trước và xuất ảnh.
@@ -62,17 +62,36 @@ const AvatarFrame: React.FC = () => {
   }, [userImage, message]);
 
   // Hàm wrap text cho canvas
-  // Hàm wrap text theo số ký tự tối đa mỗi dòng
+  // Hàm wrap text theo từ thay vì theo ký tự để tránh cắt giữa từ
   function drawWrappedText(ctx: CanvasRenderingContext2D, text: string, x: number, y: number, maxCharsPerLine: number, lineHeight: number) {
     // Tách dòng thủ công nếu có ký tự xuống dòng
     const paragraphs = text.split(/\r?\n/);
     for (let p = 0; p < paragraphs.length; p++) {
       let str = paragraphs[p];
       while (str.length > 0) {
-        let line = str.slice(0, maxCharsPerLine);
+        let line = '';
+        let words = str.split(' ');
+        
+        for (let i = 0; i < words.length; i++) {
+          let testLine = line + (line ? ' ' : '') + words[i];
+          if (testLine.length <= maxCharsPerLine) {
+            line = testLine;
+          } else {
+            break;
+          }
+        }
+        
+        if (line.length === 0) {
+          // Nếu từ đầu tiên quá dài, cắt theo ký tự
+          line = str.slice(0, maxCharsPerLine);
+          str = str.slice(maxCharsPerLine);
+        } else {
+          // Loại bỏ phần đã vẽ khỏi chuỗi gốc
+          str = str.slice(line.length + (str.startsWith(line + ' ') ? 1 : 0));
+        }
+        
         ctx.fillText(line, x, y);
         y += lineHeight;
-        str = str.slice(maxCharsPerLine);
       }
     }
   }
@@ -164,25 +183,26 @@ const AvatarFrame: React.FC = () => {
           {/* Bước 1: Nhập mã + Xác nhận */}
           <div className="step">
             <span className="step-number">1</span>
-            <div style={{ flex: 1, display: 'flex', gap: '10px', alignItems: 'stretch' }}>
+            <div style={{ flex: 1, display: 'flex', gap: '10px', alignItems: 'center' }}>
               <input
                 type="text"
                 placeholder="Nhập mã nhân viên"
                 value={employeeId}
                 onChange={(e) => setEmployeeId(e.target.value)}
                 className="message-input"
-                style={{ flex: 1 }}
+                style={{ flex: 1, maxWidth: '200px' }}
                 disabled={isStep1Confirmed}
               />
               <button
                 type="button"
                 className={`colorful-btn confirm-btn${(!employeeId || isStep1Confirmed || isValidatingCode) ? ' disabled' : ''}`}
-                onClick={async () => {
-                  if (!employeeId || isStep1Confirmed || isValidatingCode) return;
-                  try {
-                    setIsValidatingCode(true);
-                    setCodeError('');
-                    const map = await loadCodeMessageCsv();
+                  style={{ flex: 1,marginTop: '0px' }}
+                  onClick={async () => {
+                    if (!employeeId || isStep1Confirmed || isValidatingCode) return;
+                    try {
+                      setIsValidatingCode(true);
+                      setCodeError('');
+                      const map = await loadCodeMessageCsv();
                     const normalized = employeeId.trim();
                     if (normalized && map[normalized] !== undefined) {
                       const csvMsg = map[normalized];
@@ -203,7 +223,7 @@ const AvatarFrame: React.FC = () => {
             </div>
           </div>
           {codeError && (
-            <div className="message-note red" style={{ marginTop: -8 }}>
+            <div className="message-note red" style={{ marginTop: 4, marginLeft: 56 }}>
               {codeError}
             </div>
           )}
@@ -251,7 +271,7 @@ const AvatarFrame: React.FC = () => {
             </div>
           </div>
 
-          <div className="button-group">
+          <div className="button-group" style={{ marginTop: 16 }}>
             <button
               className={`colorful-btn full-width-btn${(!isStep1Confirmed || !userImage || !message) ? ' disabled' : ''}`}
               style={{ marginBottom: 0 }}
