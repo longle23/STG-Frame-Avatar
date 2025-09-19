@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import AvatarFrame from './AvatarFrame';
 import SplashScreen from './SplashScreen';
 import './App.css';
