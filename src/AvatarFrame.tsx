@@ -71,7 +71,7 @@ const AvatarFrame: React.FC = () => {
             y: cropY,
             width: cropSize,
             height: cropSize,
-            scale: 0.3
+            scale: 0.1
           });
         };
         img.src = imgSrc;

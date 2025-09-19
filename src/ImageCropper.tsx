@@ -51,7 +51,7 @@ const ImageCropper: React.FC<ImageCropperProps> = ({
       if (img) {
         // Với object-fit: contain, ảnh sẽ tự động fit vào container
         // Chúng ta chỉ cần scale nhỏ hơn để dễ căn chỉnh
-        let initialScale = 0.3; // Mặc định 30%
+        let initialScale = 0.1; // Mặc định 10%
         
         setCropData({
           x: centerX,
@@ -66,7 +66,7 @@ const ImageCropper: React.FC<ImageCropperProps> = ({
           y: centerY,
           width: initialSize,
           height: initialSize,
-          scale: 0.3
+          scale: 0.1
         });
       }
     }
