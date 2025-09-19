@@ -389,3 +389,214 @@
 .read-the-docs {
   color: #888;
 }
+
+/* Drag and Drop Interface Styles */
+.drag-container {
+  position: relative;
+  width: 100%;
+  height: 500px;
+  border: 2px solid #fff600;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #f8fafc;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.drag-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Draggable image styles */
+.draggable-image {
+  position: absolute;
+  cursor: grab;
+  border: 2px solid #fff600;
+  border-radius: 8px;
+  overflow: hidden;
+  z-index: 10;
+  user-select: none;
+  box-shadow: 0 4px 12px rgba(255, 246, 0, 0.3);
+  transition: box-shadow 0.2s ease;
+}
+
+.draggable-image:hover {
+  box-shadow: 0 6px 16px rgba(255, 246, 0, 0.4);
+}
+
+.draggable-image:active {
+  cursor: grabbing;
+}
+
+.draggable-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+/* Resize handle */
+.resize-handle {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 20px;
+  height: 20px;
+  background: #fff600;
+  cursor: nw-resize;
+  border-top-left-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.resize-handle:hover {
+  background: #e6e600;
+}
+
+/* Drag mode button styles */
+.colorful-btn.red {
+  background: linear-gradient(90deg, #dc2626, #b91c1c);
+  box-shadow: 0 4px 16px rgba(220, 38, 38, 0.2);
+}
+
+.colorful-btn.red:hover {
+  background: linear-gradient(90deg, #b91c1c, #dc2626);
+  box-shadow: 0 6px 20px rgba(220, 38, 38, 0.3);
+}
+
+/* Drag mode instructions */
+.drag-instructions {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  background: rgba(255, 246, 0, 0.9);
+  color: #1f2937;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-align: center;
+  z-index: 5;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Image Cropper Styles */
+.image-cropper-container {
+  position: relative;
+  width: 100%;
+  height: 500px;
+  border: 2px solid #fff600;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #f8fafc;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  user-select: none;
+}
+
+.cropper-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.cropper-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 2;
+}
+
+.crop-area {
+  position: absolute;
+  border: 2px solid #fff600;
+  background: transparent;
+  cursor: move;
+  z-index: 3;
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
+}
+
+.crop-area:hover {
+  border-color: #ffeb3b;
+}
+
+/* Resize handles */
+.resize-handle {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: #fff600;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 4;
+  transition: all 0.2s ease;
+}
+
+.resize-handle:hover {
+  background: #ffeb3b;
+  transform: scale(1.2);
+}
+
+.resize-handle.nw {
+  top: -6px;
+  left: -6px;
+  cursor: nw-resize;
+}
+
+.resize-handle.ne {
+  top: -6px;
+  right: -6px;
+  cursor: ne-resize;
+}
+
+.resize-handle.sw {
+  bottom: -6px;
+  left: -6px;
+  cursor: sw-resize;
+}
+
+.resize-handle.se {
+  bottom: -6px;
+  right: -6px;
+  cursor: se-resize;
+}
+
+/* Grid lines */
+.grid-lines {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.grid-line {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.8);
+  z-index: 1;
+}
+
+.grid-line.vertical {
+  width: 1px;
+  height: 100%;
+  top: 0;
+}
+
+.grid-line.horizontal {
+  height: 1px;
+  width: 100%;
+  left: 0;
+}

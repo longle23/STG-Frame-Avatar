@@ -1,0 +1,205 @@
+import React, { useState, useRef, useCallback, useEffect } from 'react';
+
+interface ImageCropperProps {
+  src: string;
+  onCropChange: (cropData: CropData) => void;
+  containerWidth: number;
+  containerHeight: number;
+}
+
+interface CropData {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  scale: number;
+}
+
+const ImageCropper: React.FC<ImageCropperProps> = ({
+  src,
+  onCropChange,
+  containerWidth,
+  containerHeight
+}) => {
+  const [cropData, setCropData] = useState<CropData>({
+    x: 50,
+    y: 50,
+    width: 400,
+    height: 400,
+    scale: 1
+  });
+  
+  const [isDragging, setIsDragging] = useState(false);
+  const [isResizing, setIsResizing] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [resizeStart, setResizeStart] = useState({ x: 0, y: 0, width: 0, height: 0 });
+  
+  const containerRef = useRef<HTMLDivElement>(null);
+  const imageRef = useRef<HTMLImageElement>(null);
+
+  // Xử lý khi ảnh load
+  const handleImageLoad = () => {
+    // Chỉ khởi tạo nếu chưa có crop data
+    if (cropData.width === 200 && cropData.height === 200) {
+      // Khởi tạo crop area rộng hơn (80% container)
+      const initialSize = Math.min(containerWidth, containerHeight) * 0.8;
+      const centerX = (containerWidth - initialSize) / 2;
+      const centerY = (containerHeight - initialSize) / 2;
+      
+      setCropData({
+        x: centerX,
+        y: centerY,
+        width: initialSize,
+        height: initialSize,
+        scale: 1
+      });
+    }
+  };
+
+  // Xử lý kéo thả crop area
+  const handleCropMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+    setDragStart({
+      x: e.clientX - cropData.x,
+      y: e.clientY - cropData.y
+    });
+  }, [cropData]);
+
+  // Xử lý resize crop area
+  const handleResizeMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsResizing(true);
+    setResizeStart({
+      x: e.clientX,
+      y: e.clientY,
+      width: cropData.width,
+      height: cropData.height
+    });
+  }, [cropData]);
+
+  // Xử lý di chuyển chuột
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    if (isDragging) {
+      const newX = e.clientX - dragStart.x;
+      const newY = e.clientY - dragStart.y;
+      
+      // Giới hạn trong container
+      const maxX = containerWidth - cropData.width;
+      const maxY = containerHeight - cropData.height;
+      
+      setCropData(prev => ({
+        ...prev,
+        x: Math.max(0, Math.min(newX, maxX)),
+        y: Math.max(0, Math.min(newY, maxY))
+      }));
+    } else if (isResizing) {
+      const deltaX = e.clientX - resizeStart.x;
+      const deltaY = e.clientY - resizeStart.y;
+      
+      const newWidth = Math.max(100, Math.min(resizeStart.width + deltaX, containerWidth - cropData.x));
+      const newHeight = Math.max(100, Math.min(resizeStart.height + deltaY, containerHeight - cropData.y));
+      
+      setCropData(prev => ({
+        ...prev,
+        width: newWidth,
+        height: newHeight
+      }));
+    }
+  }, [isDragging, isResizing, dragStart, resizeStart, cropData, containerWidth, containerHeight]);
+
+  // Xử lý thả chuột
+  const handleMouseUp = useCallback(() => {
+    if (isDragging || isResizing) {
+      setIsDragging(false);
+      setIsResizing(false);
+    }
+  }, [isDragging, isResizing]);
+
+  // Xử lý zoom
+  const handleWheel = useCallback((e: React.WheelEvent) => {
+    e.preventDefault();
+    const delta = e.deltaY > 0 ? -0.1 : 0.1;
+    const newScale = Math.max(0.5, Math.min(3, cropData.scale + delta));
+    
+    setCropData(prev => ({
+      ...prev,
+      scale: newScale
+    }));
+  }, [cropData.scale]);
+
+  // Cập nhật crop data khi có thay đổi
+  useEffect(() => {
+    onCropChange(cropData);
+  }, [cropData, onCropChange]);
+
+  // Event listeners
+  useEffect(() => {
+    if (isDragging || isResizing) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+      return () => {
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+      };
+    }
+  }, [isDragging, isResizing, handleMouseMove, handleMouseUp]);
+
+  return (
+    <div 
+      ref={containerRef}
+      className="image-cropper-container"
+      onWheel={handleWheel}
+    >
+      {/* Ảnh nền */}
+      <div className="cropper-background">
+        <img
+          ref={imageRef}
+          src={src}
+          alt="Crop source"
+          onLoad={handleImageLoad}
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            pointerEvents: 'none'
+          }}
+        />
+      </div>
+
+      {/* Overlay tối */}
+      <div className="cropper-overlay">
+        {/* Crop area */}
+        <div
+          className="crop-area"
+          style={{
+            left: cropData.x,
+            top: cropData.y,
+            width: cropData.width,
+            height: cropData.height
+          }}
+          onMouseDown={handleCropMouseDown}
+        >
+          {/* Resize handles */}
+          <div className="resize-handle nw" onMouseDown={handleResizeMouseDown} />
+          <div className="resize-handle ne" onMouseDown={handleResizeMouseDown} />
+          <div className="resize-handle sw" onMouseDown={handleResizeMouseDown} />
+          <div className="resize-handle se" onMouseDown={handleResizeMouseDown} />
+          
+          {/* Grid lines */}
+          <div className="grid-lines">
+            <div className="grid-line vertical" style={{ left: '33.33%' }} />
+            <div className="grid-line vertical" style={{ left: '66.66%' }} />
+            <div className="grid-line horizontal" style={{ top: '33.33%' }} />
+            <div className="grid-line horizontal" style={{ top: '66.66%' }} />
+          </div>
+        </div>
+      </div>
+
+    </div>
+  );
+};
+
+export default ImageCropper;

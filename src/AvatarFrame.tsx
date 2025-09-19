@@ -10,6 +10,7 @@ const LINE_HEIGHT = 32; // khoảng cách dòng
 
 // Component AvatarFrame: Cho phép người dùng tải ảnh lên, chèn vào khung, xem trước và xuất ảnh.
 import React, { useRef, useState } from 'react';
+import ImageCropper from './ImageCropper';
 
 // const FRAME_SRC = '/src/assets/Frame_Avatar.png';
 const FRAME_SRC = '/Frame_Avatar.png';
@@ -37,6 +38,8 @@ const AvatarFrame: React.FC = () => {
   const [isValidatingCode, setIsValidatingCode] = useState<boolean>(false);
   const [codeError, setCodeError] = useState<string>('');
   const [codeToMessageMap, setCodeToMessageMap] = useState<Record<string, string> | null>(null);
+  const [cropData, setCropData] = useState({ x: 0, y: 0, width: 200, height: 200, scale: 1 });
+  const [isCropMode, setIsCropMode] = useState<boolean>(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
 
@@ -48,6 +51,38 @@ const AvatarFrame: React.FC = () => {
       reader.onload = async (ev) => {
         const imgSrc = ev.target?.result as string;
         setUserImage(imgSrc);
+        
+        // Tự động center và fit ảnh vào frame
+        const img = new Image();
+        img.onload = () => {
+          const containerSize = 500; // Kích thước container crop
+          const imgAspect = img.width / img.height;
+          const containerAspect = 1; // Container vuông
+          
+          let cropWidth, cropHeight;
+          if (imgAspect > containerAspect) {
+            // Ảnh rộng hơn - fit theo chiều cao
+            cropHeight = containerSize * 0.8;
+            cropWidth = cropHeight * imgAspect;
+          } else {
+            // Ảnh cao hơn - fit theo chiều rộng
+            cropWidth = containerSize * 0.8;
+            cropHeight = cropWidth / imgAspect;
+          }
+          
+          // Center crop area
+          const cropX = (containerSize - cropWidth) / 2;
+          const cropY = (containerSize - cropHeight) / 2;
+          
+          setCropData({
+            x: cropX,
+            y: cropY,
+            width: cropWidth,
+            height: cropHeight,
+            scale: 1
+          });
+        };
+        img.src = imgSrc;
       };
       reader.readAsDataURL(file);
     }
@@ -56,10 +91,11 @@ const AvatarFrame: React.FC = () => {
   // Luôn cập nhật preview khi message hoặc userImage thay đổi
   React.useEffect(() => {
     if (userImage) {
-      generatePreview(userImage);
+      // Luôn sử dụng crop data nếu đã có
+      generatePreview(userImage, cropData.width > 0);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userImage, message]);
+  }, [userImage, message, cropData]);
 
   // Hàm wrap text cho canvas
   // Hàm wrap text theo từ thay vì theo ký tự để tránh cắt giữa từ
@@ -125,7 +161,7 @@ const AvatarFrame: React.FC = () => {
   };
 
   // Tạo preview với ảnh, khung và text
-  const generatePreview = async (imgSrc: string) => {
+  const generatePreview = async (imgSrc: string, useCropData = false) => {
     if (!canvasRef.current) return;
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
@@ -142,8 +178,30 @@ const AvatarFrame: React.FC = () => {
     ]);
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    // Sử dụng crop thông minh thay vì stretch ảnh
-    cropImageToFit(ctx, imgUser, canvas.width, canvas.height);
+    
+    if (useCropData && cropData.width > 0) {
+      // Vẽ ảnh theo crop data
+      console.log('Using crop data:', cropData); // Debug log
+      
+      // Tính toán vị trí crop trên ảnh gốc
+      const cropX = (cropData.x / 500) * imgUser.width;
+      const cropY = (cropData.y / 500) * imgUser.height;
+      const cropWidth = (cropData.width / 500) * imgUser.width;
+      const cropHeight = (cropData.height / 500) * imgUser.height;
+      
+      console.log('Crop coordinates:', { cropX, cropY, cropWidth, cropHeight }); // Debug log
+      
+      // Vẽ phần ảnh đã crop
+      ctx.drawImage(
+        imgUser,
+        cropX, cropY, cropWidth, cropHeight,
+        0, 0, canvas.width, canvas.height
+      );
+    } else {
+      // Sử dụng crop thông minh thay vì stretch ảnh (mode cũ)
+      cropImageToFit(ctx, imgUser, canvas.width, canvas.height);
+    }
+    
     ctx.drawImage(imgFrame, 0, 0, canvas.width, canvas.height);
 
     // Vẽ text câu chúc lên ảnh
@@ -163,6 +221,19 @@ const AvatarFrame: React.FC = () => {
     setResultUrl(url);
   };
 
+  // Xử lý thay đổi crop data
+  const handleCropChange = (newCropData: any) => {
+    console.log('Crop data changed:', newCropData); // Debug log
+    setCropData(newCropData);
+    // useEffect sẽ tự động cập nhật preview
+  };
+
+  // Chuyển đổi giữa crop mode và preview mode
+  const toggleCropMode = () => {
+    setIsCropMode(!isCropMode);
+    // useEffect sẽ tự động cập nhật preview
+  };
+
   // Reset form
   const handleReset = () => {
     setUserImage(null);
@@ -172,12 +243,14 @@ const AvatarFrame: React.FC = () => {
     setIsStep1Confirmed(false);
     setIsValidatingCode(false);
     setCodeError('');
+    setIsCropMode(false);
+    setCropData({ x: 0, y: 0, width: 200, height: 200, scale: 1 });
   };
 
   // Tải và parse CSV chỉ 1 lần khi cần
   const loadCodeMessageCsv = async (): Promise<Record<string, string>> => {
     if (codeToMessageMap) return codeToMessageMap;
-    const response = await fetch('/CodeMessage.csv');
+    const response = await fetch('/CodeMessageUpdate.csv');
     if (!response.ok) throw new Error('Không tải được CodeMessage.csv');
     const text = await response.text();
     const lines = text.split(/\r?\n/);
@@ -300,6 +373,24 @@ const AvatarFrame: React.FC = () => {
             </div>
           </div>
 
+          {/* Nút chuyển đổi crop mode */}
+          {userImage && (
+            <div className="step">
+              <span className="step-number">4</span>
+              <div style={{ flex: 1 }}>
+                <button
+                  className={`colorful-btn full-width-btn${isCropMode ? ' red' : ''}`}
+                  onClick={toggleCropMode}
+                >
+                  {isCropMode ? 'XEM TRƯỚC' : 'CHỈNH ẢNH'}
+                </button>
+                <div className="message-note">
+                  {isCropMode ? 'Kéo 4 góc khung để chỉnh ảnh' : 'Bấm để chỉnh vị trí và kích thước ảnh trong frame'}
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className="button-group" style={{ marginTop: 16 }}>
             <button
               className={`colorful-btn full-width-btn${(!isStep1Confirmed || !userImage || !message) ? ' disabled' : ''}`}
@@ -325,7 +416,14 @@ const AvatarFrame: React.FC = () => {
       </div>
 
       <div className="right-panel">
-        {resultUrl ? (
+        {isCropMode && userImage ? (
+          <ImageCropper
+            src={userImage}
+            onCropChange={handleCropChange}
+            containerWidth={500}
+            containerHeight={500}
+          />
+        ) : resultUrl ? (
           <img
             src={resultUrl}
             alt="Avatar kết quả"
