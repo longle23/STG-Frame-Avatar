@@ -96,6 +96,34 @@ const AvatarFrame: React.FC = () => {
     }
   }
 
+  // Hàm crop ảnh đơn giản để vừa khung hình không bị méo
+  const cropImageToFit = (ctx: CanvasRenderingContext2D, img: HTMLImageElement, canvasWidth: number, canvasHeight: number) => {
+    const imgAspectRatio = img.width / img.height;
+    const canvasAspectRatio = canvasWidth / canvasHeight;
+    
+    let sourceX = 0;
+    let sourceY = 0;
+    let sourceWidth = img.width;
+    let sourceHeight = img.height;
+    
+    if (imgAspectRatio > canvasAspectRatio) {
+      // Ảnh rộng hơn canvas - crop theo chiều rộng (cắt 2 bên)
+      sourceWidth = img.height * canvasAspectRatio;
+      sourceX = (img.width - sourceWidth) / 2;
+    } else {
+      // Ảnh cao hơn canvas - crop theo chiều cao (cắt trên dưới)
+      sourceHeight = img.width / canvasAspectRatio;
+      sourceY = (img.height - sourceHeight) / 2;
+    }
+    
+    // Vẽ ảnh đã crop vào canvas
+    ctx.drawImage(
+      img,
+      sourceX, sourceY, sourceWidth, sourceHeight, // source rectangle
+      0, 0, canvasWidth, canvasHeight // destination rectangle
+    );
+  };
+
   // Tạo preview với ảnh, khung và text
   const generatePreview = async (imgSrc: string) => {
     if (!canvasRef.current) return;
@@ -114,7 +142,8 @@ const AvatarFrame: React.FC = () => {
     ]);
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.drawImage(imgUser, 0, 0, canvas.width, canvas.height);
+    // Sử dụng crop thông minh thay vì stretch ảnh
+    cropImageToFit(ctx, imgUser, canvas.width, canvas.height);
     ctx.drawImage(imgFrame, 0, 0, canvas.width, canvas.height);
 
     // Vẽ text câu chúc lên ảnh
@@ -303,8 +332,15 @@ const AvatarFrame: React.FC = () => {
             className="preview-image"
           />
         ) : (
-          <div className="result-placeholder">
-            Chưa có ảnh kết quả
+          <div className="frame-placeholder">
+            <img
+              src={FRAME_SRC}
+              alt="Khung avatar SOTRANS"
+              className="frame-preview"
+            />
+            <div className="placeholder-text" style={{color:'red'}}>
+              {isStep1Confirmed ? 'Chọn ảnh để xem trước' : 'Nhập mã nhân viên để bắt đầu'}
+            </div>
           </div>
         )}
         <canvas ref={canvasRef} width={CANVAS_WIDTH} height={CANVAS_HEIGHT} style={{ display: 'none' }} />
