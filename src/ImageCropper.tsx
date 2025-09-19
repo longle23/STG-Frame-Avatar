@@ -99,13 +99,15 @@ const ImageCropper: React.FC<ImageCropperProps> = ({
       const deltaX = e.clientX - resizeStart.x;
       const deltaY = e.clientY - resizeStart.y;
       
-      const newWidth = Math.max(100, Math.min(resizeStart.width + deltaX, containerWidth - cropData.x));
-      const newHeight = Math.max(100, Math.min(resizeStart.height + deltaY, containerHeight - cropData.y));
+      // Giữ crop area vuông
+      const delta = Math.max(deltaX, deltaY);
+      const newSize = Math.max(100, Math.min(resizeStart.width + delta, 
+        Math.min(containerWidth - cropData.x, containerHeight - cropData.y)));
       
       setCropData(prev => ({
         ...prev,
-        width: newWidth,
-        height: newHeight
+        width: newSize,
+        height: newSize
       }));
     }
   }, [isDragging, isResizing, dragStart, resizeStart, cropData, containerWidth, containerHeight]);
@@ -163,7 +165,7 @@ const ImageCropper: React.FC<ImageCropperProps> = ({
           style={{
             width: '100%',
             height: '100%',
-            objectFit: 'cover',
+            objectFit: 'contain',
             pointerEvents: 'none'
           }}
         />

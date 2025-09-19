@@ -59,26 +59,32 @@ const AvatarFrame: React.FC = () => {
           const imgAspect = img.width / img.height;
           const containerAspect = 1; // Container vuông
           
-          let cropWidth, cropHeight;
+          // Tính kích thước ảnh khi fit vào container với object-fit: contain
+          let displayWidth, displayHeight;
           if (imgAspect > containerAspect) {
             // Ảnh rộng hơn - fit theo chiều cao
-            cropHeight = containerSize * 0.8;
-            cropWidth = cropHeight * imgAspect;
+            displayHeight = containerSize;
+            displayWidth = displayHeight * imgAspect;
           } else {
             // Ảnh cao hơn - fit theo chiều rộng
-            cropWidth = containerSize * 0.8;
-            cropHeight = cropWidth / imgAspect;
+            displayWidth = containerSize;
+            displayHeight = displayWidth / imgAspect;
           }
           
-          // Center crop area
-          const cropX = (containerSize - cropWidth) / 2;
-          const cropY = (containerSize - cropHeight) / 2;
+          // Vị trí ảnh trong container (center)
+          const imgX = (containerSize - displayWidth) / 2;
+          const imgY = (containerSize - displayHeight) / 2;
+          
+          // Tạo crop area vuông ở giữa ảnh
+          const cropSize = Math.min(displayWidth, displayHeight) * 0.8;
+          const cropX = imgX + (displayWidth - cropSize) / 2;
+          const cropY = imgY + (displayHeight - cropSize) / 2;
           
           setCropData({
             x: cropX,
             y: cropY,
-            width: cropWidth,
-            height: cropHeight,
+            width: cropSize,
+            height: cropSize,
             scale: 1
           });
         };
@@ -180,14 +186,21 @@ const AvatarFrame: React.FC = () => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
     if (useCropData && cropData.width > 0) {
-      // Vẽ ảnh theo crop data
+      // Vẽ ảnh theo crop data - đồng bộ chính xác với khung vàng
       console.log('Using crop data:', cropData); // Debug log
       
-      // Tính toán vị trí crop trên ảnh gốc
-      const cropX = (cropData.x / 500) * imgUser.width;
-      const cropY = (cropData.y / 500) * imgUser.height;
-      const cropWidth = (cropData.width / 500) * imgUser.width;
-      const cropHeight = (cropData.height / 500) * imgUser.height;
+      // Tính toán vị trí crop trên ảnh gốc dựa trên vị trí khung vàng
+      const containerSize = 500; // Kích thước container crop
+      
+      // Tính tỷ lệ giữa container crop và ảnh gốc
+      const scaleX = imgUser.width / containerSize;
+      const scaleY = imgUser.height / containerSize;
+      
+      // Vị trí crop trên ảnh gốc
+      const cropX = cropData.x * scaleX;
+      const cropY = cropData.y * scaleY;
+      const cropWidth = cropData.width * scaleX;
+      const cropHeight = cropData.height * scaleY;
       
       console.log('Crop coordinates:', { cropX, cropY, cropWidth, cropHeight }); // Debug log
       
